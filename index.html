@@ -1,1 +1,323 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentoCar</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.8.4/dist/htmx.min.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.10.2/dist/cdn.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .car-image {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .carousel-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .carousel-dot.active {
+            background: #ffffff;
+            transform: scale(1.2);
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .gradient-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .icon-circle:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto p-4 pt-6 md:p-6 lg:p-8" 
+         x-data="{ 
+            business: { 
+                name: 'RentoCar', 
+                tagline: 'Drive your dreams with our affordable car rentals', 
+                address: '123 Main St, Manila, Philippines', 
+                phone: '+63 123 456 7890', 
+                email: 'info@rentocar.com', 
+                facebook: 'https://www.facebook.com/rentocar', 
+                instagram: 'https://www.instagram.com/rentocar', 
+                whatsapp: 'https://wa.me/631234567890', 
+                officeHours: 'Mon-Fri: 8am-5pm, Sat: 9am-2pm' 
+            }, 
+            qrCodeUrl: null, 
+            currentImage: 0, 
+            images: [
+                'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1553440569-bcc63803a83d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+            ], 
+            availableCars: [
+                { name: 'Toyota Vios', price: '₱1,500/day' },
+                { name: 'Honda City', price: '₱1,800/day' },
+                { name: 'Mitsubishi Mirage', price: '₱1,200/day' },
+                { name: 'Suzuki Swift', price: '₱1,400/day' }
+            ] 
+         }"
+         x-init="setInterval(() => {
+            currentImage = (currentImage + 1) % images.length;
+         }, 5000)">
+        
+        <!-- Main Card -->
+        <div class="max-w-2xl mx-auto">
+            <div class="gradient-card rounded-2xl p-6 md:p-8">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" 
+                        x-text="business.name">
+                    </h1>
+                    <p class="text-gray-600 mt-2 text-lg" x-text="business.tagline"></p>
+                </div>
+
+                <!-- Carousel -->
+                <div class="carousel-container mb-8">
+                    <template x-for="(image, index) in images" :key="index">
+                        <img :src="image" 
+                             alt="Car" 
+                             class="w-full h-64 md:h-80 object-cover rounded-xl"
+                             :class="{ 'hidden': index !== currentImage }"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100">
+                    </template>
+                    
+                    <!-- Dots Indicator -->
+                    <div class="carousel-dots">
+                        <template x-for="(image, index) in images" :key="index">
+                            <div class="carousel-dot" 
+                                 :class="{ 'active': index === currentImage }"
+                                 @click="currentImage = index">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="flex justify-center space-x-4 mb-8">
+                    <a :href="business.facebook" target="_blank" 
+                       class="icon-circle bg-blue-100 hover:bg-blue-500 group">
+                        <i class="fab fa-facebook-f text-blue-600 group-hover:text-white"></i>
+                    </a>
+                    <a :href="business.instagram" target="_blank" 
+                       class="icon-circle bg-pink-100 hover:bg-pink-500 group">
+                        <i class="fab fa-instagram text-pink-600 group-hover:text-white"></i>
+                    </a>
+                    <a :href="business.whatsapp" target="_blank" 
+                       class="icon-circle bg-green-100 hover:bg-green-500 group">
+                        <i class="fab fa-whatsapp text-green-600 group-hover:text-white"></i>
+                    </a>
+                    <a :href="'tel:' + business.phone.replace(/\s/g, '')" 
+                       class="icon-circle bg-purple-100 hover:bg-purple-500 group">
+                        <i class="fas fa-phone text-purple-600 group-hover:text-white"></i>
+                    </a>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+                        <i class="fas fa-map-marker-alt text-blue-500 mt-1"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Address</p>
+                            <p class="text-gray-600" x-text="business.address"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+                        <i class="fas fa-phone text-green-500 mt-1"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Phone</p>
+                            <p class="text-gray-600" x-text="business.phone"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-purple-50 rounded-lg">
+                        <i class="fas fa-envelope text-purple-500 mt-1"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Email</p>
+                            <p class="text-gray-600" x-text="business.email"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg">
+                        <i class="fas fa-clock text-yellow-500 mt-1"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Office Hours</p>
+                            <p class="text-gray-600" x-text="business.officeHours"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Cars -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Available Cars & Rates</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <template x-for="(car, index) in availableCars" :key="index">
+                            <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
+                                <span class="font-medium text-gray-800" x-text="car.name"></span>
+                                <span class="font-bold text-blue-600" x-text="car.price"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Map -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Our Location</h3>
+                    <div class="rounded-xl overflow-hidden shadow-lg">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.455635568787!2d121.04444431533435!3d14.59941148979368!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ca03571e585b%3A0x69bd16d8b1ff9a2a!2s123%20Main%20St%2C%20Manila%2C%20Philippines!5e0!3m2!1sen!2sus!4v1634567890123!5m2!1sen!2sus" 
+                                width="100%" 
+                                height="250" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                    <button class="flex-1 gradient-btn text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center space-x-2"
+                            @click="window.open(business.facebook, '_blank')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Book Now</span>
+                    </button>
+                    
+                    <button class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg"
+                            @click="shareLink()">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Share Link</span>
+                    </button>
+                    
+                    <button class="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg"
+                            @click="generateQrCode()">
+                        <i class="fas fa-qrcode"></i>
+                        <span>QR Code</span>
+                    </button>
+                </div>
+
+                <!-- QR Code Display -->
+                <div class="mt-8 text-center" x-show="qrCodeUrl">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Scan to Save Contact</h3>
+                    <img :src="qrCodeUrl" 
+                         alt="QR Code" 
+                         class="mx-auto rounded-xl border-4 border-white shadow-lg">
+                </div>
+
+                <!-- PWA Notice -->
+                <div class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl text-center">
+                    <i class="fas fa-mobile-alt text-blue-500 text-2xl mb-2"></i>
+                    <p class="text-sm text-gray-600 font-medium">
+                        Install this digital card on your home screen for easy access!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js"></script>
+    <script>
+        // PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Share Functionality
+        function shareLink() {
+            const link = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'RentoCar - Premium Car Rentals',
+                    text: 'Check out RentoCar for affordable and reliable car rentals!',
+                    url: link,
+                })
+                .then(() => console.log('Shared successfully'))
+                .catch((error) => console.error('Error sharing:', error));
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+
+        // Generate QR Code
+        function generateQrCode() {
+            const link = window.location.href;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(link)}&format=svg&color=2d3748&bgcolor=f8fafc&margin=10`;
+            this.qrCodeUrl = qrCodeUrl;
+            
+            // Auto-scroll to QR code
+            setTimeout(() => {
+                document.querySelector('[x-show="qrCodeUrl"]').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 100);
+        }
+
+        // Add carousel navigation with keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                Alpine.$data(document.querySelector('[x-data]')).currentImage = 
+                    (Alpine.$data(document.querySelector('[x-data]')).currentImage - 1 + 
+                    Alpine.$data(document.querySelector('[x-data]')).images.length) % 
+                    Alpine.$data(document.querySelector('[x-data]')).images.length;
+            } else if (e.key === 'ArrowRight') {
+                Alpine.$data(document.querySelector('[x-data]')).currentImage = 
+                    (Alpine.$data(document.querySelector('[x-data]')).currentImage + 1) % 
+                    Alpine.$data(document.querySelector('[x-data]')).images.length;
+            }
+        });
+    </script>
+</body>
+</html>
